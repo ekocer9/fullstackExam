@@ -1,4 +1,3 @@
-// server/database/cartQueries.js
 import dbPromise from './db.js';
 
 // Add a product to the cart

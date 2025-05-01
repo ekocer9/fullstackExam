@@ -1,4 +1,3 @@
-// server/database/userQueries.js
 import dbPromise from './db.js';
 import bcrypt from 'bcrypt';
 
@@ -40,7 +39,6 @@ async function getUserById(userId) {
   return user;
 }
 
-// (Optional) Delete a user
 async function deleteUser(userId) {
   const db = await dbPromise;
 

@@ -1,4 +1,3 @@
-// server/database/orderQueries.js
 import dbPromise from './db.js';
 import { clearCart } from './cartQueries.js';
 
@@ -32,6 +31,7 @@ async function createOrder(userId) {
 
   const orderId = result.lastID;
 
+  //TODO: 
   // Normally we would have an order_items table to save products separately.
   // To keep it simple, we skip that for now.
 

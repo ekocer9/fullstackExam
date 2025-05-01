@@ -1,4 +1,3 @@
-// server/routers/auth/authRouter.js
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { createUser, getUserByEmail, getUserById, deleteUser } from '../../database/userQueries.js';
@@ -10,7 +9,7 @@ dotenv.config();
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret123'; // fallback if .env missing
+const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 
 // POST /api/auth/signup
 router.post('/api/auth/signup', async (req, res) => {
@@ -78,6 +77,34 @@ router.get('/api/auth/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+// PATCH /api/auth/profile
+router.patch('/api/auth/profile', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { email, password } = req.body;
+
+  if (!email && !password) {
+    return res.status(400).json({ message: 'Email or password required' });
+  }
+
+  try {
+    const db = await dbPromise;
+    if (email) {
+      await db.run('UPDATE users SET email = ? WHERE id = ?', [email, userId]);
+    }
+
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      await db.run('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
+    }
+
+    res.status(200).json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 
 // DELETE /api/auth/delete
 router.delete('/api/auth/delete', authenticateToken, async (req, res) => {

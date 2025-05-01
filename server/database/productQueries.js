@@ -1,4 +1,3 @@
-// server/database/productQueries.js
 import dbPromise from './db.js';
 
 // Get all products

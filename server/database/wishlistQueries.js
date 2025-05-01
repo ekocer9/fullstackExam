@@ -1,4 +1,3 @@
-// server/database/wishlistQueries.js
 import dbPromise from './db.js';
 
 // Add a product to wishlist

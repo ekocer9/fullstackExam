@@ -1,4 +1,3 @@
-// server/database/setupDb.js
 import dbPromise from './db.js';
 
 async function setupDatabase() {
@@ -17,9 +16,11 @@ async function setupDatabase() {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
+      name TEXT NOT NULL,
       description TEXT,
       price INTEGER,
+      team TEXT,
+      playerName TEXT,
       image TEXT
     );
   `);
@@ -67,12 +68,24 @@ async function setupDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       product_id INTEGER,
+      UNIQUE(user_id, product_id),
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(product_id) REFERENCES products(id)
     );
   `);
 
   console.log('Database setup complete.');
+
+  await db.run(`
+    INSERT INTO products (name, description, price, team, playerName)
+    VALUES
+      ('FC Barcelona Jersey', '2024 Home Kit', 499, 'FC Barcelona', 'Lewandowski'),
+      ('Real Madrid Jersey', '2024 Away Kit', 529, 'Real Madrid', 'Vinícius Jr.'),
+      ('Manchester City Jersey', '2024 Third Kit', 479, 'Man City', 'Haaland'),
+      ('Arsenal Jersey', '2024 Home Kit', 459, 'Arsenal', 'Saka')
+  `);
+  
+  console.log('✅ Sample products inserted!');
 }
 
 setupDatabase();

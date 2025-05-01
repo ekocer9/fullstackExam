@@ -1,4 +1,3 @@
-// server/database/reviewQueries.js
 import dbPromise from './db.js';
 
 // Create a new review for a product

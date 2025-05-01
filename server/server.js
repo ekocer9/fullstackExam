@@ -1,4 +1,3 @@
-// server/server.js
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -25,9 +24,9 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: process.env.CLIENT_URL,
-  methods: ["GET", "POST", "DELETE", "PATCH", "PUT"],
-  allowedHeaders: ["Content-Type", "Authorization", "Bearer"],
+  origin: 'http://127.0.0.1:8080',
+  methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Import routers
@@ -59,5 +58,5 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-const PORT = 8080;
+const PORT = 3000;
 server.listen(PORT, () => {console.log(`Server running on PORT: ` + PORT);});
