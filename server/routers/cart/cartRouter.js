@@ -20,14 +20,14 @@ router.get('/api/cart', authenticateToken, async (req, res) => {
 // POST add a product to cart
 router.post('/api/cart', authenticateToken, async (req, res) => {
   const userId = req.user.id;
-  const { productId, quantity } = req.body;
+  const { productId, quantity, size } = req.body;
 
-  if (!productId || !quantity) {
-    return res.status(400).json({ message: 'Product ID and quantity are required' });
-  }
+  if (!productId || !quantity || !size) {
+    return res.status(400).json({ message: 'Missing productId, quantity, or size' });
+  }  
 
   try {
-    await addToCart(userId, productId, quantity);
+    await addToCart(userId, productId, quantity, size);
     res.status(201).json({ message: 'Product added to cart' });
   } catch (error) {
     console.error('Error adding to cart:', error);

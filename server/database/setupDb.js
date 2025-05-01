@@ -41,13 +41,14 @@ async function setupDatabase() {
 
   // Create cart_items table
   await db.exec(`
-    CREATE TABLE IF NOT EXISTS cart_items (
+    CREATE TABLE cart_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       product_id INTEGER,
       quantity INTEGER,
-      FOREIGN KEY(user_id) REFERENCES users(id),
-      FOREIGN KEY(product_id) REFERENCES products(id)
+      size TEXT, -- ✅ this is new
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
     );
   `);
 
@@ -68,11 +69,13 @@ async function setupDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       product_id INTEGER,
-      UNIQUE(user_id, product_id),
+      size TEXT,
+      UNIQUE(user_id, product_id, size),
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(product_id) REFERENCES products(id)
     );
   `);
+
 
   console.log('Database setup complete.');
 

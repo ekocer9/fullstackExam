@@ -1,27 +1,26 @@
 import dbPromise from './db.js';
 
 // Add a product to the cart
-async function addToCart(userId, productId, quantity) {
+async function addToCart(userId, productId, quantity, size) {
   const db = await dbPromise;
 
-  // Check if the product is already in the cart
+  // Check if the product is already in the cart (also match by size)
   const existing = await db.get(
-    'SELECT * FROM cart_items WHERE user_id = ? AND product_id = ?',
-    [userId, productId]
+    'SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? AND size = ?',
+    [userId, productId, size]
   );
 
   if (existing) {
-    // If exists, update quantity
     const newQuantity = existing.quantity + quantity;
     await db.run(
       'UPDATE cart_items SET quantity = ? WHERE id = ?',
       [newQuantity, existing.id]
     );
   } else {
-    // If not exists, insert new cart item
     await db.run(
-      'INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)',
-      [userId, productId, quantity]
+      `INSERT INTO cart_items (user_id, product_id, quantity, size)
+       VALUES (?, ?, ?, ?)`,
+      [userId, productId, quantity, size]
     );
   }
 }
@@ -30,12 +29,18 @@ async function addToCart(userId, productId, quantity) {
 async function getCartItems(userId) {
   const db = await dbPromise;
   const cartItems = await db.all(
-    `SELECT cart_items.id as cartItemId, products.*, cart_items.quantity
+    `SELECT 
+       cart_items.id as cartItemId,
+       cart_items.quantity,
+       cart_items.size,
+       products.name,
+       products.price,
+       products.image as imageUrl
      FROM cart_items
      JOIN products ON cart_items.product_id = products.id
      WHERE cart_items.user_id = ?`,
     [userId]
-  );
+  );  
   return cartItems;
 }
 

@@ -1,6 +1,6 @@
 import { Navbar } from "../components/Navbar.js";
 import { Footer } from "../components/Footer.js";
-import { apiGet, apiDelete } from "../js/api.js";
+import { apiGet, apiDelete, apiPatch } from "../js/api.js";
 
 export async function ProfilePage(app) {
   const token = localStorage.getItem("token");
@@ -10,52 +10,79 @@ export async function ProfilePage(app) {
   }
 
   app.innerHTML = `
-    ${Navbar()}
-    <h1>My Profile</h1>
-    <div id="profileInfo"></div>
-    <button id="deleteAccount">Delete My Account</button>
+  ${Navbar()}
+  <div class="profile-container">
+
+    <form id="updateForm" class="profile-update-form">
+      <h2>Update Your Profile</h2>
+
+      <label for="email"><strong>Email:</strong></label>
+      <input type="email" name="email" id="emailInput" required />
+
+      <label for="password"><strong>New Password:</strong></label>
+      <input type="password" name="password" placeholder="Leave blank to keep current" />
+
+      <button type="submit">Update Profile</button>
+    </form>
+
+      <button id="deleteAccount">Delete My Account</button>
+    </div>
     ${Footer()}
   `;
 
   try {
     const response = await fetch("http://localhost:3000/api/auth/profile", {
       headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + token,
       },
     });
-
+  
     if (!response.ok) {
       throw new Error("Unauthorized or invalid token");
     }
-
+  
     const user = await response.json();
-    document.getElementById("profileInfo").innerHTML = `
-      <p><strong>Email:</strong> ${user.email}</p>
-      <p><strong>User ID:</strong> ${user.id}</p>
-    `;
+    document.getElementById('emailInput').value = user.email;
   } catch (error) {
     console.error("Failed to fetch profile:", error);
-    document.getElementById("profileInfo").innerHTML =
-      "<p>Unable to load profile.</p>";
-  }
+    alert("Unable to load profile.");
+  }  
 
-  document
-    .getElementById("deleteAccount")
-    .addEventListener("click", async () => {
-      const confirmDelete = confirm(
-        "Are you sure you want to delete your account?"
-      );
-      if (!confirmDelete) return;
+  // Handle profile update
+  document.getElementById("updateForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value.trim();
+    const updates = {};
 
-      try {
-        await apiDelete("/api/auth/delete", token);
-        localStorage.removeItem("token");
-        alert("Your account has been deleted.");
-        history.pushState(null, "", "/");
-        window.dispatchEvent(new Event("popstate"));
-      } catch (error) {
-        console.error("Error deleting account:", error);
-        alert("Something went wrong.");
-      }
-    });
+    if (email) updates.email = email;
+    if (password) updates.password = password;
+
+    try {
+      await apiPatch("/api/auth/profile", updates, token);
+      alert("Profile updated successfully.");
+      history.pushState(null, "", "/profile");
+      window.dispatchEvent(new Event("popstate"));
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Failed to update profile.");
+    }
+  });
+
+  // Handle account deletion
+  document.getElementById("deleteAccount").addEventListener("click", async () => {
+    const confirmDelete = confirm("Are you sure you want to delete your account?");
+    if (!confirmDelete) return;
+
+    try {
+      await apiDelete("/api/auth/profile", token);
+      localStorage.removeItem("token");
+      alert("Your account has been deleted.");
+      history.pushState(null, "", "/");
+      window.dispatchEvent(new Event("popstate"));
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Something went wrong.");
+    }
+  });
 }

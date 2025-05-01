@@ -31,11 +31,12 @@ export async function WishlistPage(app) {
           <h3>${item.name}</h3>
           <p>${item.description}</p>
           <p>Price: ${item.price} DKK</p>
-          <button onclick="addToCartFromWishlist(${item.id})">Add to Cart</button>
+          <p><strong>Size:</strong> ${item.size}</p>
+          <button onclick="addToCartFromWishlist(${item.id}, '${item.size || "M"}')">Add to Cart</button>
           <button onclick="removeFromWishlist(${item.wishlistItemId})">Remove</button>
         `;
         wishlistContainer.appendChild(div);
-      });
+      });      
     }
 
   } catch (error) {
@@ -44,12 +45,24 @@ export async function WishlistPage(app) {
   }
 }
 
-window.addToCartFromWishlist = async function(productId) {
-  const token = localStorage.getItem('token');
-  if (!token) return alert('Login required');
-  await apiPost('/api/cart', { productId: productId, quantity: 1 }, token);
-  alert('Added to cart!');
-}
+window.addToCartFromWishlist = async function(productId, size) {
+  const token = localStorage.getItem("token");
+  if (!token) return alert("Login required");
+
+  const quantity = 1;
+
+  // Fallback in case size is missing
+  if (!size) size = "M";
+
+  try {
+    await apiPost("/api/cart", { productId, quantity, size }, token);
+    alert("Added to cart from wishlist!");
+
+  } catch (error) {
+    console.error("Failed to add from wishlist:", error);
+    alert("Failed to add to cart. Please try again.");
+  }
+};
 
 window.removeFromWishlist = async function(wishlistItemId) {
   const token = localStorage.getItem('token');

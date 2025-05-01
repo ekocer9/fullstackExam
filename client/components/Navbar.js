@@ -35,9 +35,7 @@ window.logout = async function () {
   if (token) {
     try {
       const cartItems = await fetch('http://localhost:3000/api/cart', {
-        headers: {
-          Authorization: 'Bearer ' + token
-        }
+        headers: { Authorization: 'Bearer ' + token }
       }).then(res => res.ok ? res.json() : []);
 
       localStorage.setItem('guestCart', JSON.stringify(cartItems));
@@ -47,10 +45,17 @@ window.logout = async function () {
   }
 
   localStorage.removeItem('token');
+
+  await fetch('http://localhost:3000/api/cart/clear', {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer ' + token }
+  }).catch(console.error);
+
   alert('You have been logged out.');
   history.pushState(null, '', '/');
   window.dispatchEvent(new Event('popstate'));
 };
+
 
 
 window.refreshNavbar = function () {

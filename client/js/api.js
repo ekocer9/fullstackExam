@@ -29,6 +29,23 @@ export async function apiPost(path, data, token) {
   return await response.json();
 }
 
+export async function apiPatch(path, data, token) {
+  const response = await fetch('http://localhost:3000' + path, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: 'Bearer ' + token })
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return await response.json();
+}
+
 export async function apiDelete(endpoint, token = null) {
   const res = await fetch(BASE_URL + endpoint, {
     method: 'DELETE',

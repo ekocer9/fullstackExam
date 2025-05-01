@@ -4,6 +4,7 @@ import { createUser, getUserByEmail, getUserById, deleteUser } from '../../datab
 import { authenticateToken } from '../../middleware/middleware.js';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import dbPromise from '../../database/db.js';
 
 dotenv.config();
 
@@ -52,7 +53,7 @@ router.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '15m' });
 
     res.status(200).json({ token });
   } catch (error) {
@@ -80,8 +81,13 @@ router.get('/api/auth/profile', authenticateToken, async (req, res) => {
 
 // PATCH /api/auth/profile
 router.patch('/api/auth/profile', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const { email, password } = req.body;
+
+  console.log('Incoming PATCH /api/auth/profile request:');
+  console.log('userId:', userId);
+  console.log('email:', email);
+  console.log('password present:', !!password);
 
   if (!email && !password) {
     return res.status(400).json({ message: 'Email or password required' });
@@ -89,25 +95,28 @@ router.patch('/api/auth/profile', authenticateToken, async (req, res) => {
 
   try {
     const db = await dbPromise;
+
     if (email) {
+      console.log('Updating email...');
       await db.run('UPDATE users SET email = ? WHERE id = ?', [email, userId]);
     }
 
     if (password) {
+      console.log('Hashing and updating password...');
       const hashed = await bcrypt.hash(password, 10);
       await db.run('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
     }
 
+    console.log('Update complete!');
     res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
-    console.error('Profile update error:', error);
+    console.error('Profile update error:', error); // This will now always print
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-
 // DELETE /api/auth/delete
-router.delete('/api/auth/delete', authenticateToken, async (req, res) => {
+router.delete('/api/auth/profile', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {

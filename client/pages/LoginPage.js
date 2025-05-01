@@ -26,21 +26,26 @@ export function LoginPage(app) {
       if (response.token) {
         localStorage.setItem('token', response.token);
 
-        // ✅ Merge guest cart into user cart
         const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
 
         for (const item of guestCart) {
+          if (!item.productId || !item.quantity || !item.size) {
+            console.warn("Skipping invalid guest cart item:", item);
+            continue;
+          }
+        
           try {
             await apiPost('/api/cart', {
               productId: item.productId,
               quantity: item.quantity,
+              size: item.size,
             }, response.token);
           } catch (err) {
             console.error('Failed to merge guest cart item:', err);
           }
         }
 
-        localStorage.removeItem('guestCart'); // ✅ Clear guest cart after merge
+        localStorage.removeItem('guestCart');
 
         alert('Login successful!');
         history.pushState(null, '', '/');

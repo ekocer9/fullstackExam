@@ -21,14 +21,14 @@ router.get('/api/wishlist', authenticateToken, async (req, res) => {
 // POST add a product to wishlist
 router.post('/api/wishlist', authenticateToken, async (req, res) => {
   const userId = req.user.id;
-  const { productId } = req.body;
+  const { productId, size } = req.body;
 
-  if (!productId) {
-    return res.status(400).json({ message: 'Product ID is required' });
+  if (!productId || !size) {
+    return res.status(400).json({ message: 'Product ID and size are required' });
   }
 
   try {
-    await addToWishlist(userId, productId);
+    await addToWishlist(userId, productId, size);
     res.status(201).json({ message: 'Product added to wishlist' });
   } catch (error) {
     console.error('Error adding to wishlist:', error);

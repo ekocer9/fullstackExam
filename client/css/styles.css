@@ -152,7 +152,6 @@
     padding: 2rem;
   }
   
-  /* RESPONSIVE BUTTON GROUP ON CART PAGE */
   .cart-controls {
     display: flex;
     flex-direction: column;
@@ -181,5 +180,108 @@
   
   .cart-item button {
     margin-top: 0.5rem;
+  }
+  
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+  }
+  
+  .profile-info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .profile-info p {
+    margin-bottom: 0.5rem;
+  }
+  
+  .profile-update-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 2rem;
+  }
+  
+  #deleteAccount {
+    background-color: #b30000;
+    border: none;
+    padding: 1rem;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    transition: background-color 0.2s ease;
+  }
+  
+  #deleteAccount:hover {
+    background-color: #800000;
+  }
+
+  .cart-item-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+  
+  .cart-item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .cart-item-details {
+    flex: 1;
+  }
+  
+  .remove-btn {
+    margin-top: 1rem;
+    background-color: #b30000;
+    color: white;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    max-width: 250px;
+  }
+  
+  .remove-btn:hover {
+    background-color: #800000;
+  }
+  
+  
+  .carousel-container {
+    width: 100%;
+    max-width: 900px;
+    height: 400px; 
+    margin: 2rem auto;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .carousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    display: block;
   }
   

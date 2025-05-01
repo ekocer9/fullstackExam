@@ -7,8 +7,29 @@ import { WishlistPage } from '../pages/WishlistPage.js';
 import { OrdersPage } from '../pages/OrdersPage.js';
 import { ProfilePage } from '../pages/ProfilePage.js';
 
+function isTokenExpired(token) {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp < currentTime;
+  } catch (e) {
+    console.error('Error decoding token:', e);
+    return true;
+  }
+}
 
 function router() {
+  const token = localStorage.getItem('token');
+
+  if (token && isTokenExpired(token)) {
+    localStorage.removeItem('token');
+    alert('Your session has expired. Please log in again.');
+    history.pushState(null, '', '/login');
+    window.dispatchEvent(new Event('popstate'));
+    return;
+  }
+
   const path = window.location.pathname;
   const app = document.getElementById('app');
 
@@ -30,7 +51,7 @@ function router() {
     ProfilePage(app);
   } else {
     app.innerHTML = `<h1>404 - Page Not Found</h1>`;
-  } 
+  }
 }
 
 window.addEventListener('popstate', router);

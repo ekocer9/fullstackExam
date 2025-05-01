@@ -1,29 +1,33 @@
 import dbPromise from './db.js';
 
 // Add a product to wishlist
-async function addToWishlist(userId, productId) {
+async function addToWishlist(userId, productId, size) {
   const db = await dbPromise;
 
   // Check if already exists (to prevent duplicates)
   const existing = await db.get(
-    `SELECT * FROM wishlist_items WHERE user_id = ? AND product_id = ?`,
-    [userId, productId]
+    `SELECT * FROM wishlist_items WHERE user_id = ? AND product_id = ? AND size = ?`,
+    [userId, productId, size]
   );
 
   if (!existing) {
     await db.run(
-      `INSERT INTO wishlist_items (user_id, product_id) VALUES (?, ?)`,
-      [userId, productId]
+      `INSERT INTO wishlist_items (user_id, product_id, size) VALUES (?, ?, ?)`,
+      [userId, productId, size]
     );
   }
 }
+
 
 // Get all wishlist items for a user
 async function getWishlist(userId) {
   const db = await dbPromise;
 
   const wishlist = await db.all(
-    `SELECT wishlist_items.id as wishlistItemId, products.*
+    `SELECT 
+       wishlist_items.id as wishlistItemId,
+       wishlist_items.size,
+       products.*
      FROM wishlist_items
      JOIN products ON wishlist_items.product_id = products.id
      WHERE wishlist_items.user_id = ?`,
