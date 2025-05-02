@@ -8,7 +8,9 @@ async function setupDatabase() {
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE,
-      password TEXT
+      password TEXT,
+      first_name TEXT,
+      last_name TEXT
     );
   `);
 
@@ -20,7 +22,6 @@ async function setupDatabase() {
       description TEXT,
       price INTEGER,
       team TEXT,
-      playerName TEXT,
       image TEXT
     );
   `);
@@ -46,7 +47,9 @@ async function setupDatabase() {
       user_id INTEGER,
       product_id INTEGER,
       quantity INTEGER,
-      size TEXT, -- ✅ this is new
+      size TEXT,
+      custom_name TEXT,
+      custom_number TEXT,
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
@@ -70,6 +73,8 @@ async function setupDatabase() {
       user_id INTEGER,
       product_id INTEGER,
       size TEXT,
+      custom_name TEXT,
+      custom_number TEXT,
       UNIQUE(user_id, product_id, size),
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(product_id) REFERENCES products(id)
@@ -80,12 +85,12 @@ async function setupDatabase() {
   console.log('Database setup complete.');
 
   await db.run(`
-    INSERT INTO products (name, description, price, team, playerName)
+    INSERT INTO products (name, description, price, team, image)
     VALUES
-      ('FC Barcelona Jersey', '2024 Home Kit', 499, 'FC Barcelona', 'Lewandowski'),
-      ('Real Madrid Jersey', '2024 Away Kit', 529, 'Real Madrid', 'Vinícius Jr.'),
-      ('Manchester City Jersey', '2024 Third Kit', 479, 'Man City', 'Haaland'),
-      ('Arsenal Jersey', '2024 Home Kit', 459, 'Arsenal', 'Saka')
+      ('FC Barcelona Jersey', '2024 Home Kit', 499, 'FC Barcelona', './images/fcbarcelona.jpeg'),
+      ('Real Madrid Jersey', '2024 Away Kit', 529, 'Real Madrid', './images/realmadrid.jpeg'),
+      ('Manchester City Jersey', '2024 Third Kit', 479, 'Man City', './images/mancity.jpeg'),
+      ('Arsenal Jersey', '2024 Home Kit', 459, 'Arsenal', './images/arsenal.jpeg')
   `);
   
   console.log('✅ Sample products inserted!');

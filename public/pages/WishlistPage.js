@@ -22,21 +22,32 @@ export async function WishlistPage(app) {
     const wishlistItems = await apiGet('/api/wishlist', token);
 
     if (wishlistItems.length === 0) {
-      wishlistContainer.innerHTML = '<p>Your wishlist is empty.</p>';
+      wishlistContainer.innerHTML = `
+      <div class="empty-cart-message">
+        <p>Your wishlist is empty ❤️</p>
+      </div>
+    `;    
     } else {
       wishlistItems.forEach(item => {
         const div = document.createElement('div');
         div.className = 'wishlist-item';
         div.innerHTML = `
-          <h3>${item.name}</h3>
-          <p>${item.description}</p>
-          <p>Price: ${item.price} DKK</p>
-          <p><strong>Size:</strong> ${item.size}</p>
-          <button onclick="addToCartFromWishlist(${item.id}, '${item.size || "M"}')">Add to Cart</button>
-          <button onclick="removeFromWishlist(${item.wishlistItemId})">Remove</button>
+          <div class="cart-item-inner">
+            <img src="${item.image || '/images/default.jpg'}" alt="${item.name}" class="cart-item-image" />
+            <div class="cart-item-details">
+              <h3>${item.name}</h3>
+              <p><strong>Size:</strong> ${item.size || 'N/A'}</p>
+              ${item.custom_name ? `<p><strong>Name:</strong> ${item.custom_name}</p>` : ""}
+              ${item.custom_number ? `<p><strong>Number:</strong> ${item.custom_number}</p>` : ""}
+              <p><strong>Price:</strong> ${item.price} DKK</p>
+
+              <button class="btn-primary" onclick="addToCartFromWishlist(${item.id}, '${item.size}', '${item.custom_name || ""}', '${item.custom_number || ""}')">Add to Cart</button>
+              <button class="remove-btn" onclick="removeFromWishlist(${item.wishlistItemId})">Remove</button>
+            </div>
+          </div>
         `;
         wishlistContainer.appendChild(div);
-      });      
+      });
     }
 
   } catch (error) {
@@ -45,19 +56,19 @@ export async function WishlistPage(app) {
   }
 }
 
-window.addToCartFromWishlist = async function(productId, size) {
+window.addToCartFromWishlist = async function(productId, size, name, number) {
   const token = localStorage.getItem("token");
   if (!token) return alert("Login required");
 
-  const quantity = 1;
-
-  // Fallback in case size is missing
-  if (!size) size = "M";
-
   try {
-    await apiPost("/api/cart", { productId, quantity, size }, token);
+    await apiPost("/api/cart", {
+      productId,
+      quantity: 1,
+      size,
+      name: name || null,
+      number: number || null
+    }, token);
     alert("Added to cart from wishlist!");
-
   } catch (error) {
     console.error("Failed to add from wishlist:", error);
     alert("Failed to add to cart. Please try again.");
@@ -70,4 +81,4 @@ window.removeFromWishlist = async function(wishlistItemId) {
   await apiDelete(`/api/wishlist/${wishlistItemId}`, token);
   alert('Item removed from wishlist');
   window.location.reload();
-}
+};

@@ -45,6 +45,7 @@ window.logout = async function () {
   }
 
   localStorage.removeItem('token');
+  localStorage.removeItem("guestCart"); 
 
   await fetch('http://localhost:3000/api/cart/clear', {
     method: 'DELETE',

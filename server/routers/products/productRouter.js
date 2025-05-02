@@ -1,7 +1,7 @@
 // server/routers/products/productRouter.js
 import { Router } from 'express';
 import { getAllProducts, getProductById } from '../../database/productQueries.js';
-import { authenticateToken } from '../../middleware/middleware.js'; // Only needed if any endpoint is protected
+import { authenticateToken } from '../../middleware/middleware.js'; 
 
 const router = Router();
 

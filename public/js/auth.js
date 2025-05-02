@@ -6,8 +6,19 @@ export async function handleLogin(form) {
 
   try {
     const response = await apiPost("/api/auth/login", { email, password });
+
     if (response.token) {
       localStorage.setItem("token", response.token);
+
+      // Transfer guestCart to real cart
+      const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
+      if (guestCart.length > 0) {
+        for (const item of guestCart) {
+          await apiPost("/api/cart", item, response.token);
+        }
+        localStorage.removeItem("guestCart");
+      }
+
       alert("Login successful");
       history.pushState(null, "", "/");
       window.dispatchEvent(new Event("popstate"));
@@ -18,33 +29,27 @@ export async function handleLogin(form) {
     console.error("Login error:", err);
     alert("Something went wrong.");
   }
-
-  const response = await apiPost("/api/auth/login", { email, password });
-
-  if (response.token) {
-    localStorage.setItem("token", response.token);
-
-    // Transfer guestCart to real cart
-    const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
-    if (guestCart.length > 0) {
-      for (const item of guestCart) {
-        await apiPost("/api/cart", item, response.token);
-      }
-      localStorage.removeItem("guestCart");
-    }
-
-    alert("Login successful");
-    history.pushState(null, "", "/");
-    window.dispatchEvent(new Event("popstate"));
-  }
 }
 
 export async function handleSignup(form) {
   const email = form.querySelector("#email").value;
   const password = form.querySelector("#password").value;
+  const first_name = form.querySelector("#first_name").value;
+  const last_name = form.querySelector("#last_name").value;
+
+  if (!first_name || !last_name) {
+    alert("Please enter your full name.");
+    return;
+  }
 
   try {
-    const response = await apiPost("/api/auth/signup", { email, password });
+    const response = await apiPost("/api/auth/signup", {
+      email,
+      password,
+      first_name,
+      last_name
+    });
+
     if (response.user) {
       alert("Signup successful! Please log in.");
       history.pushState(null, "", "/login");

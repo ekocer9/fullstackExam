@@ -9,7 +9,7 @@ export async function HomePage(app) {
     <h1>Welcome to Fullstacked Shop</h1>
     <section class="carousel-container">
       <div class="carousel">
-        <img id="carouselImage" src="/images/football1.jpeg" alt="Slide" />
+        <img id="carouselImage" src="./images/football1.jpeg" alt="Slide" />
       </div>
     </section>
     <p style="text-align: center;">Browse our latest jerseys below.</p>
@@ -44,26 +44,19 @@ export async function HomePage(app) {
       const card = document.createElement("div");
       card.className = "product-card";
       card.innerHTML = `
-      <h3>${product.name}</h3>
-      <p>${product.description}</p>
-      <p><strong>${product.price} DKK</strong></p>
-      <p>${product.team} - ${product.playerName}</p>
+        <img src="${product.image || '/images/default.jpg'}" alt="${product.name}" 
+             class="product-card-img" 
+             onclick="navigateToProduct(${product.id})" />
     
-      <label for="size-${product.id}">Size:</label>
-      <select id="size-${product.id}" class="size-selector">
-        <option value="S">S</option>
-        <option value="M" selected>M</option>
-        <option value="L">L</option>
-        <option value="XL">XL</option>
-        <option value="XXL">XXL</option>
-        <option value="XXXL">XXXL</option>
-      </select>
+        <h3>${product.name}</h3>
+        <p>${product.description}</p>
+        <p><strong>${product.price} DKK</strong></p>
+        <p>${product.team}</p>
     
-      <button onclick="addToCart(${product.id})">Add to Cart</button>
-      <button onclick="addToWishlist(${product.id})">♡ Wishlist</button>
-    `;    
+        <button onclick="navigateToProduct(${product.id})">View Product</button>
+      `;
       productList.appendChild(card);
-    });
+    });    
   } catch (error) {
     productList.innerHTML = `<p>Failed to load products.</p>`;
     console.error("Error loading products:", error);
@@ -107,4 +100,9 @@ window.addToWishlist = async function(productId) {
   } catch (err) {
     console.error("Failed to add to wishlist:", err);
   }
+};
+
+window.navigateToProduct = function (productId) {
+  history.pushState(null, "", `/product?id=${productId}`);
+  window.dispatchEvent(new Event("popstate"));
 };

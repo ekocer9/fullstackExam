@@ -1,11 +1,11 @@
-import { HomePage } from '../pages/HomePage.js';
-import { LoginPage } from '../pages/LoginPage.js';
-import { SignupPage } from '../pages/SignupPage.js';
-import { ProductDetailsPage } from '../pages/ProductDetailsPage.js';
-import { CartPage } from '../pages/CartPage.js';
-import { WishlistPage } from '../pages/WishlistPage.js';
-import { OrdersPage } from '../pages/OrdersPage.js';
-import { ProfilePage } from '../pages/ProfilePage.js';
+import { HomePage } from '../../pages/HomePage.js';
+import { LoginPage } from '../../pages/LoginPage.js';
+import { SignupPage } from '../../pages/SignupPage.js';
+import { ProductDetailsPage } from '../../pages/ProductDetailsPage.js';
+import { CartPage } from '../../pages/CartPage.js';
+import { WishlistPage } from '../../pages/WishlistPage.js';
+import { OrdersPage } from '../../pages/OrdersPage.js';
+import { ProfilePage } from '../../pages/ProfilePage.js';
 
 function isTokenExpired(token) {
   if (!token) return true;
@@ -39,7 +39,7 @@ function router() {
     LoginPage(app);
   } else if (path === '/signup') {
     SignupPage(app);
-  } else if (path === '/product') {
+  } else if (path.startsWith('/product')) {
     ProductDetailsPage(app);
   } else if (path === '/cart') {
     CartPage(app);

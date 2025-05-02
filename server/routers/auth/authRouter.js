@@ -14,10 +14,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 
 // POST /api/auth/signup
 router.post('/api/auth/signup', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, first_name, last_name } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+  if (!email || !password || !first_name || !last_name) {
+    return res.status(400).json({ message: 'Email, password, first name, and last name are required' });
   }
 
   try {
@@ -26,7 +26,7 @@ router.post('/api/auth/signup', async (req, res) => {
       return res.status(409).json({ message: 'User already exists' });
     }
 
-    const user = await createUser(email, password);
+    const user = await createUser(email, password, first_name, last_name);
     res.status(201).json({ message: 'User created successfully', user });
   } catch (error) {
     console.error('Signup error:', error);
@@ -82,40 +82,38 @@ router.get('/api/auth/profile', authenticateToken, async (req, res) => {
 // PATCH /api/auth/profile
 router.patch('/api/auth/profile', authenticateToken, async (req, res) => {
   const userId = req.user?.id;
-  const { email, password } = req.body;
+  const { email, password, first_name, last_name } = req.body;
 
-  console.log('Incoming PATCH /api/auth/profile request:');
-  console.log('userId:', userId);
-  console.log('email:', email);
-  console.log('password present:', !!password);
-
-  if (!email && !password) {
-    return res.status(400).json({ message: 'Email or password required' });
+  if (!email && !password && !first_name && !last_name) {
+    return res.status(400).json({ message: 'Nothing to update' });
   }
 
   try {
     const db = await dbPromise;
 
     if (email) {
-      console.log('Updating email...');
       await db.run('UPDATE users SET email = ? WHERE id = ?', [email, userId]);
     }
-
     if (password) {
-      console.log('Hashing and updating password...');
       const hashed = await bcrypt.hash(password, 10);
       await db.run('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
     }
+    if (first_name) {
+      await db.run('UPDATE users SET first_name = ? WHERE id = ?', [first_name, userId]);
+    }
+    if (last_name) {
+      await db.run('UPDATE users SET last_name = ? WHERE id = ?', [last_name, userId]);
+    }
 
-    console.log('Update complete!');
     res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
-    console.error('Profile update error:', error); // This will now always print
+    console.error('Profile update error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-// DELETE /api/auth/delete
+
+// DELETE /api/auth/profile
 router.delete('/api/auth/profile', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 

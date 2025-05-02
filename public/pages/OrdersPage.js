@@ -22,7 +22,11 @@ export async function OrdersPage(app) {
     const orders = await apiGet('/api/orders', token);
 
     if (orders.length === 0) {
-      ordersContainer.innerHTML = '<p>You have no orders yet.</p>';
+      ordersContainer.innerHTML = `
+      <div class="empty-cart-message">
+        <p>You have no orders yet 📦</p>
+      </div>
+    `;    
     } else {
       orders.forEach(order => {
         const div = document.createElement('div');
