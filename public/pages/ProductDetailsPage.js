@@ -116,15 +116,22 @@ export async function ProductDetailsPage(app) {
   });  
 
   document.getElementById("addToWishlistBtn").addEventListener("click", async () => {
-    if (!token) return
+    if (!token) {
+      showToast("You must be logged in to add to wishlist.", "error");
+      return;
+    }
   
     const size = document.getElementById("size").value;
     const type = document.querySelector('input[name="customType"]:checked').value;
   
     let custom_name = null, custom_number = null;
     if (type === "custom") {
-      custom_name = document.getElementById("customNameInput").value;
-      custom_number = document.getElementById("customNumberInput").value;
+      custom_name = document.getElementById("customNameInput").value.trim();
+      custom_number = document.getElementById("customNumberInput").value.trim();
+      if (!custom_name || !custom_number) {
+        showToast("Please enter both name and number.", "error");
+        return;
+      }
     } else if (type === "player") {
       const selected = document.getElementById("playerSelect").value;
       [custom_name, custom_number] = selected.split("-");
@@ -136,6 +143,6 @@ export async function ProductDetailsPage(app) {
     } catch (err) {
       console.error("Wishlist error:", err);
       showToast("Failed to add to wishlist", "error");
-    }    
+    }
   });  
 }

@@ -1,10 +1,17 @@
+// db.js
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Open the database connection
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const dbPath = path.join(__dirname, 'database.db');
+
 const dbPromise = open({
-  filename: './database/database.db',
-  driver: sqlite3.Database
+  filename: dbPath,
+  driver: sqlite3.Database,
 });
 
 export default dbPromise;
