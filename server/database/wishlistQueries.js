@@ -23,15 +23,14 @@ async function getWishlist(userId) {
   const db = await dbPromise;
 
   const wishlist = await db.all(
-    `SELECT 
-       wishlist_items.id as wishlistItemId,
-       wishlist_items.size,
-       wishlist_items.custom_name,
-       wishlist_items.custom_number,
-       products.*
-     FROM wishlist_items
-     JOIN products ON wishlist_items.product_id = products.id
-     WHERE wishlist_items.user_id = ?`,
+    `SELECT wishlist_items.id as wishlistItemId,
+    wishlist_items.size,
+    wishlist_items.custom_name,
+    wishlist_items.custom_number,
+    products.*
+    FROM wishlist_items
+    JOIN products ON wishlist_items.product_id = products.id
+    WHERE wishlist_items.user_id = ?`,
     [userId]
   );
 

@@ -56,29 +56,27 @@ export async function WishlistPage(app) {
   }
 }
 
-window.addToCartFromWishlist = async function(productId, size, name, number) {
+window.addToCartFromWishlist = async function(productId, size, custom_name, custom_number) {
   const token = localStorage.getItem("token");
-  if (!token) return alert("Login required");
+  if (!token) return
 
   try {
     await apiPost("/api/cart", {
       productId,
       quantity: 1,
       size,
-      name: name || null,
-      number: number || null
+      custom_name: custom_name || null,
+      custom_number: custom_number || null
     }, token);
-    alert("Added to cart from wishlist!");
+
   } catch (error) {
     console.error("Failed to add from wishlist:", error);
-    alert("Failed to add to cart. Please try again.");
   }
 };
 
 window.removeFromWishlist = async function(wishlistItemId) {
   const token = localStorage.getItem('token');
-  if (!token) return alert('Login required');
+  if (!token) return
   await apiDelete(`/api/wishlist/${wishlistItemId}`, token);
-  alert('Item removed from wishlist');
   window.location.reload();
 };

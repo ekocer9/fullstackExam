@@ -1,6 +1,7 @@
 import { Navbar } from '../components/Navbar.js';
 import { Footer } from '../components/Footer.js';
 import { apiGet, apiPost } from '../js/api.js';
+import { showToast } from "../util/toast.js";
 
 export async function ProductDetailsPage(app) {
   const params = new URLSearchParams(location.search);
@@ -29,6 +30,9 @@ export async function ProductDetailsPage(app) {
           <option>XXL</option>
           <option>XXXL</option>
         </select>
+
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" min="1" value="1" />
 
         <div class="customization-options">
           <h3>Customize:</h3>
@@ -64,42 +68,55 @@ export async function ProductDetailsPage(app) {
 
   document.getElementById("addToCartBtn").addEventListener("click", async () => {
     const size = document.getElementById("size").value;
+    const quantity = parseInt(document.getElementById("quantity").value) || 1;
     const type = document.querySelector('input[name="customType"]:checked').value;
-    let name = null, number = null;
-
+  
+    let custom_name = null;
+    let custom_number = null;
+  
     if (type === "custom") {
-      name = document.getElementById("customNameInput").value;
-      number = document.getElementById("customNumberInput").value;
-    } else if (type === "player") {
-      [name, number] = document.getElementById("playerSelect").value.split("-");
+      custom_name = document.getElementById("customNameInput").value.trim();
+      custom_number = document.getElementById("customNumberInput").value.trim();
+    
+      if (!custom_name || !custom_number) {
+        showToast("Please enter both name and number.", "error");
+        return;
+      }
+    
+      if (!/^\d+$/.test(custom_number)) {
+        showToast("Jersey number must be a valid number.", "error");
+        return;
+      }
+    
+      custom_number = parseInt(custom_number);
     }
-
-    const payload = { productId, size, quantity: 1, name, number };
-
+  
+    const payload = {
+      productId,
+      size,
+      quantity,
+      custom_name,
+      custom_number
+    };
+  
     if (token) {
       try {
         await apiPost("/api/cart", payload, token);
-        alert("Added to cart!");
+        showToast("Item added to cart!", "success");
       } catch (err) {
         console.error("Error adding to cart:", err);
-        alert("Failed to add to cart");
-      }
+        showToast("Failed to add to cart.", "error");
+      }      
     } else {
       const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
-
-      if (!productId || !size) {
-        alert("Invalid product data");
-        return;
-      }
-
-      guestCart.push({ productId, size, quantity: 1, name, number });
+      guestCart.push({ productId, size, quantity, custom_name, custom_number });
       localStorage.setItem("guestCart", JSON.stringify(guestCart));
-      alert("Added to cart (guest)");
+      showToast("Item added to guest cart", "info");
     }
-  });
+  });  
 
   document.getElementById("addToWishlistBtn").addEventListener("click", async () => {
-    if (!token) return alert("Login to use wishlist");
+    if (!token) return
   
     const size = document.getElementById("size").value;
     const type = document.querySelector('input[name="customType"]:checked').value;
@@ -115,9 +132,10 @@ export async function ProductDetailsPage(app) {
   
     try {
       await apiPost("/api/wishlist", { productId, size, custom_name, custom_number }, token);
-      alert("Added to wishlist!");
+      showToast("Added to wishlist ❤️", "success");
     } catch (err) {
       console.error("Wishlist error:", err);
-    }
+      showToast("Failed to add to wishlist", "error");
+    }    
   });  
 }

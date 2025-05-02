@@ -31,13 +31,32 @@ export async function OrdersPage(app) {
       orders.forEach(order => {
         const div = document.createElement('div');
         div.className = 'order-item';
+      
+        let itemsHTML = '';
+        if (order.items && order.items.length) {
+          order.items.forEach(item => {
+            itemsHTML += `
+              <div class="order-item-detail" style="margin: 1rem 0; border-top: 1px solid #eee; padding-top: 1rem;">
+                <p><strong>${item.name}</strong></p>
+                <p>Size: ${item.size}</p>
+                <p>Quantity: ${item.quantity}</p>
+                <p>Price per item: ${item.price} DKK</p>
+                ${item.custom_name ? `<p>Name: ${item.custom_name}</p>` : ''}
+                ${item.custom_number ? `<p>Number: ${item.custom_number}</p>` : ''}
+              </div>
+            `;
+          });
+        }
+      
         div.innerHTML = `
           <h3>Order #${order.id}</h3>
           <p>Total Price: ${order.total_price} DKK</p>
           <p>Ordered At: ${new Date(order.created_at).toLocaleString()}</p>
+          ${itemsHTML}
         `;
+      
         ordersContainer.appendChild(div);
-      });
+      });      
     }
 
   } catch (error) {

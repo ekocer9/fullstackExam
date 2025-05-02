@@ -7,47 +7,76 @@ async function createOrder(userId) {
 
   // Get all cart items for the user
   const cartItems = await db.all(
-    `SELECT cart_items.quantity, products.price
+    `SELECT * FROM cart_items WHERE user_id = ?`,
+    [userId]
+  );
+
+  if (!cartItems.length) {
+    throw new Error("Cart is empty");
+  }
+
+  // Calculate total price by joining with products
+  const detailedItems = await db.all(
+    `SELECT cart_items.*, products.price, products.name
      FROM cart_items
      JOIN products ON cart_items.product_id = products.id
      WHERE cart_items.user_id = ?`,
     [userId]
   );
 
-  if (cartItems.length === 0) {
-    throw new Error('Cart is empty');
-  }
-
-  // Calculate total price
-  const totalPrice = cartItems.reduce((sum, item) => {
+  const totalPrice = detailedItems.reduce((sum, item) => {
     return sum + item.price * item.quantity;
   }, 0);
 
-  // Insert into orders table
+  // Insert the order
   const result = await db.run(
-    `INSERT INTO orders (user_id, total_price) VALUES (?, ?)`,
+    `INSERT INTO orders (user_id, total_price, created_at)
+     VALUES (?, ?, datetime('now'))`,
     [userId, totalPrice]
   );
 
   const orderId = result.lastID;
 
-  //TODO: 
-  // Normally we would have an order_items table to save products separately.
-  // To keep it simple, we skip that for now.
+  // Insert each item into order_items table
+  for (const item of detailedItems) {
+    await db.run(
+      `INSERT INTO order_items (order_id, product_id, quantity, size, custom_name, custom_number)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [orderId, item.product_id, item.quantity, item.size, item.custom_name, item.custom_number]
+    );
+  }
 
-  // Clear the user's cart
-  await clearCart(userId);
+  // Clear the cart
+  await db.run(`DELETE FROM cart_items WHERE user_id = ?`, [userId]);
 
-  return { orderId, totalPrice };
+  return {
+    id: orderId,
+    total_price: totalPrice,
+    created_at: new Date().toISOString(),
+    items: detailedItems
+  };
 }
 
 // Get all orders for a user
 async function getOrders(userId) {
   const db = await dbPromise;
+
   const orders = await db.all(
     `SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC`,
     [userId]
   );
+
+  for (const order of orders) {
+    order.items = await db.all(
+      `SELECT order_items.quantity, order_items.size, order_items.custom_name, order_items.custom_number,
+              products.name, products.price, products.image
+       FROM order_items
+       JOIN products ON order_items.product_id = products.id
+       WHERE order_items.order_id = ?`,
+      [order.id]
+    );
+  }
+
   return orders;
 }
 

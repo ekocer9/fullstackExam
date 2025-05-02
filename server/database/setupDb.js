@@ -26,20 +26,6 @@ async function setupDatabase() {
     );
   `);
 
-  // Create reviews table
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS reviews (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER,
-      product_id INTEGER,
-      rating INTEGER,
-      comment TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(user_id) REFERENCES users(id),
-      FOREIGN KEY(product_id) REFERENCES products(id)
-    );
-  `);
-
   // Create cart_items table
   await db.exec(`
     CREATE TABLE cart_items (
@@ -66,21 +52,34 @@ async function setupDatabase() {
     );
   `);
 
+    // Create order_items table
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS order_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        size TEXT,
+        custom_name TEXT,
+        custom_number TEXT,
+        FOREIGN KEY (order_id) REFERENCES orders(id),
+        FOREIGN KEY (product_id) REFERENCES products(id)
+      );
+    `);  
+
   // Create wishlist_items table
   await db.exec(`
     CREATE TABLE IF NOT EXISTS wishlist_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER,
-      product_id INTEGER,
+      user_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
       size TEXT,
       custom_name TEXT,
       custom_number TEXT,
-      UNIQUE(user_id, product_id, size),
-      FOREIGN KEY(user_id) REFERENCES users(id),
-      FOREIGN KEY(product_id) REFERENCES products(id)
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
     );
   `);
-
 
   console.log('Database setup complete.');
 

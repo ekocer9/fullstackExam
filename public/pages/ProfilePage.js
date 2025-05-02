@@ -53,7 +53,6 @@ export async function ProfilePage(app) {
 
   } catch (error) {
     console.error("Failed to fetch profile:", error);
-    alert("Unable to load profile.");
   }
 
   // Handle profile update
@@ -72,12 +71,10 @@ export async function ProfilePage(app) {
 
     try {
       await apiPatch("/api/auth/profile", updates, token);
-      alert("Profile updated successfully.");
       history.pushState(null, "", "/profile");
       window.dispatchEvent(new Event("popstate"));
     } catch (err) {
       console.error("Update failed:", err);
-      alert("Failed to update profile.");
     }
   });
 
@@ -89,12 +86,10 @@ export async function ProfilePage(app) {
     try {
       await apiDelete("/api/auth/profile", token);
       localStorage.removeItem("token");
-      alert("Your account has been deleted.");
       history.pushState(null, "", "/");
       window.dispatchEvent(new Event("popstate"));
     } catch (error) {
       console.error("Error deleting account:", error);
-      alert("Something went wrong.");
     }
   });
 }

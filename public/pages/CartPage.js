@@ -1,6 +1,7 @@
 import { Navbar } from "../components/Navbar.js";
 import { Footer } from "../components/Footer.js";
 import { apiGet, apiPost, apiDelete } from "../js/api.js";
+import { showToast } from "../util/toast.js"; 
 
 export async function CartPage(app) {
   const token = localStorage.getItem("token");
@@ -22,7 +23,6 @@ export async function CartPage(app) {
   async function renderCartItem(item, index, isGuest = false) {
     const div = document.createElement("div");
     div.className = "cart-item";
-
     let product = item;
 
     if (isGuest) {
@@ -30,8 +30,7 @@ export async function CartPage(app) {
         const data = await apiGet(`/api/products/${item.productId}`);
         product = { ...data, ...item };
       } catch (err) {
-        console.warn("Failed to fetch product for guest cart:", err);
-        div.innerHTML = `<p>⚠️ Product not found (ID: ${item.productId})</p>`;
+        div.innerHTML = `<p>Product not found (ID: ${item.productId})</p>`;
         cartContainer.appendChild(div);
         return;
       }
@@ -39,22 +38,26 @@ export async function CartPage(app) {
 
     div.innerHTML = `
       <div class="cart-item-inner">
-        <img src="${product.image || '/images/default.jpg'}" alt="${product.name || 'Product'}" class="cart-item-image" />
+        <img src="${product.image || '/images/default.jpg'}" alt="${product.name}" class="cart-item-image" />
         <div class="cart-item-details">
-          <h3>${product.name || "Unnamed Product"}</h3>
+          <h3>${product.name}</h3>
           <p><strong>Size:</strong> ${product.size || "N/A"}</p>
-          <p><strong>Quantity:</strong> ${product.quantity || 1}</p>
+          <div class="cart-quantity-group">
+            <label for="qty-${index}"><strong>Quantity:</strong></label>
+            <input type="number" id="qty-${index}" class="quantity-input" value="${product.quantity || 1}" min="1" />
+          </div>
           <p><strong>Price:</strong> ${product.price} DKK</p>
           ${product.custom_name ? `<p><strong>Name:</strong> ${product.custom_name}</p>` : ""}
           ${product.custom_number ? `<p><strong>Number:</strong> ${product.custom_number}</p>` : ""}
+          <div class="cart-buttons">
+            <button class="btn-primary update-btn">Update Quantity</button>
+            <button class="remove-btn">REMOVE ITEM</button>
+          </div>
         </div>
       </div>
     `;
 
-    const button = document.createElement("button");
-    button.textContent = "REMOVE ITEM";
-    button.className = "remove-btn";
-    button.addEventListener("click", () => {
+    div.querySelector(".remove-btn").addEventListener("click", () => {
       if (isGuest) {
         removeGuestCartItem(index);
       } else {
@@ -62,7 +65,33 @@ export async function CartPage(app) {
       }
     });
 
-    div.querySelector(".cart-item-details").appendChild(button);
+    div.querySelector(".update-btn").addEventListener("click", async () => {
+      const qtyInput = div.querySelector(".quantity-input").value.trim();
+      const newQty = Number(qtyInput);
+      
+      if (!Number.isInteger(newQty) || newQty < 1) {
+        showToast("Please enter a valid quantity (whole number ≥ 1)", "error");
+        return;
+      }
+      
+
+      try {
+        await apiPost("/api/cart", {
+          productId: product.id,
+          quantity: newQty,
+          size: product.size,
+          custom_name: product.custom_name || null,
+          custom_number: product.custom_number || null,
+        }, token);
+        showToast("Quantity updated!", "success");
+        history.pushState(null, "", "/cart");
+        window.dispatchEvent(new Event("popstate"));
+      } catch (err) {
+        console.error("Failed to update quantity", err);
+        showToast("Error updating quantity", "error");
+      }
+    });
+
     cartContainer.appendChild(div);
   }
 
@@ -70,6 +99,7 @@ export async function CartPage(app) {
     const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
     guestCart.splice(index, 1);
     localStorage.setItem("guestCart", JSON.stringify(guestCart));
+    showToast("Item removed from cart", "success");
     history.pushState(null, "", "/cart");
     window.dispatchEvent(new Event("popstate"));
   }
@@ -77,11 +107,12 @@ export async function CartPage(app) {
   async function removeFromCart(cartItemId) {
     try {
       await apiDelete(`/api/cart/${cartItemId}`, token);
-      alert("Removed from cart");
+      showToast("Item removed from cart", "success");
       history.pushState(null, "", "/cart");
       window.dispatchEvent(new Event("popstate"));
     } catch (error) {
       console.error("Remove error:", error);
+      showToast("Failed to remove item", "error");
     }
   }
 
@@ -95,7 +126,6 @@ export async function CartPage(app) {
     window.dispatchEvent(new Event("popstate"));
   }
 
-  // Guest cart
   if (!token) {
     const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
 
@@ -109,9 +139,7 @@ export async function CartPage(app) {
     }
 
     for (let i = 0; i < guestCart.length; i++) {
-      const item = guestCart[i];
-      if (!item.productId) continue;
-      await renderCartItem(item, i, true);
+      await renderCartItem(guestCart[i], i, true);
     }
 
     const authPrompt = document.createElement("div");
@@ -130,10 +158,8 @@ export async function CartPage(app) {
     return;
   }
 
-  // Logged-in cart
   try {
     const cartItems = await apiGet("/api/cart", token);
-
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
       cartContainer.innerHTML = `
         <div class="empty-cart-message">
@@ -154,16 +180,18 @@ export async function CartPage(app) {
       checkoutBtn.addEventListener("click", async () => {
         try {
           await apiPost("/api/orders/checkout", {}, token);
-          alert("Order placed successfully!");
+          showToast("Order placed successfully!", "success");
           history.pushState(null, "", "/orders");
           window.dispatchEvent(new Event("popstate"));
         } catch (error) {
           console.error("Checkout failed", error);
+          showToast("Checkout failed. Please try again.", "error");
         }
       });
     }
   } catch (error) {
     console.error("Failed to load cart", error);
     cartContainer.innerHTML = "<p>Unable to load cart. Are you logged in?</p>";
+    showToast("Error loading cart. Try again.", "error");
   }
 }

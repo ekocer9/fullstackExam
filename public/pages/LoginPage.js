@@ -1,6 +1,7 @@
 import { Navbar } from '../components/Navbar.js';
 import { Footer } from '../components/Footer.js';
 import { apiPost } from '../js/api.js';
+import { showToast } from "../util/toast.js";
 
 export function LoginPage(app) {
   app.innerHTML = `
@@ -29,11 +30,8 @@ export function LoginPage(app) {
         const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
 
         for (const item of guestCart) {
-          if (!item.productId || !item.quantity || !item.size) {
-            console.warn("Skipping invalid guest cart item:", item);
-            continue;
-          }
-        
+          if (!item.productId || !item.quantity || !item.size) continue;
+      
           try {
             await apiPost('/api/cart', {
               productId: item.productId,
@@ -46,16 +44,15 @@ export function LoginPage(app) {
         }
 
         localStorage.removeItem('guestCart');
-
-        alert('Login successful!');
+        showToast("Login successful!", "success");
         history.pushState(null, '', '/');
         window.dispatchEvent(new Event('popstate'));
       } else {
-        document.getElementById('loginMessage').textContent = 'Login failed.';
+        showToast("Login failed. Please check your credentials.", "error");
       }
     } catch (error) {
       console.error('Login error:', error);
-      document.getElementById('loginMessage').textContent = 'Invalid credentials or server error.';
+      showToast("Login failed. Server error or invalid credentials.", "error");
     }
   });
 }

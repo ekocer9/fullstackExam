@@ -51,9 +51,6 @@ app.use(cartRouter);
 import orderRouter from './routers/orders/orderRouter.js';
 app.use(orderRouter);
 
-import reviewRouter from './routers/reviews/reviewRouter.js';
-app.use(reviewRouter);
-
 import wishlistRouter from './routers/wishlist/wishlistRouter.js';
 app.use(wishlistRouter);
 

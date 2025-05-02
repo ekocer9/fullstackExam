@@ -62,47 +62,9 @@ export async function HomePage(app) {
     console.error("Error loading products:", error);
   }
 
-  window.addToCart = async function (productId) {
-    const token = localStorage.getItem('token');
-    const size = document.querySelector(`#size-${productId}`)?.value || "M";
-    const quantity = 1;
-  
-    if (!token) {
-      // Guest cart handling
-      const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-      guestCart.push({ productId, size, quantity });
-      localStorage.setItem('guestCart', JSON.stringify(guestCart));
-      alert("Added to cart (guest)");
-      return;
-    }
-  
-    try {
-      await apiPost('/api/cart', { productId, size, quantity }, token);
-      alert('Added to cart!');
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-      alert('Something went wrong while adding to cart.');
-    }
-  };  
-}
-
-window.addToWishlist = async function(productId) {
-  const size = document.getElementById(`size-${productId}`).value || "M";
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    return alert("Login required to use wishlist");
-  }
-
-  try {
-    await apiPost("/api/wishlist", { productId, size }, token);
-    alert("Added to wishlist!");
-  } catch (err) {
-    console.error("Failed to add to wishlist:", err);
-  }
-};
-
 window.navigateToProduct = function (productId) {
   history.pushState(null, "", `/product?id=${productId}`);
   window.dispatchEvent(new Event("popstate"));
 };
+
+}

@@ -7,7 +7,7 @@ async function getAllProducts() {
   return products;
 }
 
-// Get a single product by ID (with reviews)
+// Get a single product by ID 
 async function getProductById(productId) {
   const db = await dbPromise;
 
@@ -15,15 +15,6 @@ async function getProductById(productId) {
 
   if (!product) return null;
 
-  const reviews = await db.all(
-    `SELECT reviews.id, reviews.rating, reviews.comment, reviews.created_at, users.email
-     FROM reviews
-     JOIN users ON reviews.user_id = users.id
-     WHERE reviews.product_id = ?`,
-    [productId]
-  );
-
-  product.reviews = reviews;
   return product;
 }
 

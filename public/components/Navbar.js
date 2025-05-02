@@ -1,10 +1,5 @@
 export function Navbar() {
   const token = localStorage.getItem('token');
-  const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-  const hasGuestCart = guestCart.length > 0;
-  console.log("Navbar guestCart:", guestCart);
-  console.log("hasGuestCart:", hasGuestCart);
-
 
   return `
     <nav>

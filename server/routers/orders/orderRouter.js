@@ -5,18 +5,22 @@ import { authenticateToken } from '../../middleware/middleware.js';
 
 const router = Router();
 
-// POST checkout (create an order from the cart)
+// POST /api/orders/checkout
 router.post('/api/orders/checkout', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
     const order = await createOrder(userId);
-    res.status(201).json({ message: 'Order created successfully', order });
+    res.status(201).json({
+      message: 'Order created successfully',
+      order
+    });
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(500).json({ message: error.message || 'Internal Server Error' });
   }
 });
+
 
 // GET all orders for a user
 router.get('/api/orders', authenticateToken, async (req, res) => {
